@@ -437,7 +437,14 @@ function PlayerHeader({ player }: { player: any }) {
   return (
     <div className="flex justify-between items-end mb-2 border-b border-white/10 pb-2">
       <div>
-        <div className="text-xl font-bold font-display">{player.name}</div>
+        <div className="text-xl font-bold font-display flex items-center gap-2">
+          {player.name}
+          {player.wins > 0 && (
+            <span className="text-xs bg-yellow-500/20 text-yellow-300 px-1.5 py-0.5 rounded border border-yellow-500/50" title="胜场连胜记录">
+              🏆 {player.wins}
+            </span>
+          )}
+        </div>
         <div className="text-[var(--color-neon-gold)] text-sm">{char?.name || '未知'}</div>
       </div>
       <div className="text-right">
