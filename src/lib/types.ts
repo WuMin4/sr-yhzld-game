@@ -24,6 +24,7 @@ export interface PlayerState {
   dice: DiceType[];
   characterId: string | null;
   statuses: Record<StatusEffect, number>;
+  wins: number;
   // Transient state per round
   rerolls: number;
   rolledDice: { type: DiceType; value: number; id: string }[];
