@@ -4,7 +4,7 @@ import { CHARACTERS } from './cards';
 const generateId = () => Math.random().toString(36).substr(2, 9);
 export const randomInt = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
 
-export const createInitialPlayer = (id: string, name: string): PlayerState => ({
+export const createInitialPlayer = (id: string, name: string, wins: number = 0): PlayerState => ({
   id,
   name,
   hp: 0,
@@ -24,6 +24,7 @@ export const createInitialPlayer = (id: string, name: string): PlayerState => ({
     pierce: 0,
     combo: 0
   },
+  wins,
   rerolls: 0,
   rolledDice: [],
   selectedDiceIds: [],
@@ -72,9 +73,14 @@ export type GameAction =
   | { type: 'RESTART_GAME' };
 
 // Internal game logic helpers
-const endGame = (state: GameState, winnerId: string) => {
+const endGame = (state: GameState, winnerId: string | null) => {
   state.phase = 'GAME_OVER';
-  appendLog(state, `游戏结束！${state.players[winnerId].name} 获得了胜利！`, 'skill');
+  if (winnerId) {
+    state.players[winnerId].wins += 1;
+    appendLog(state, `游戏结束！${state.players[winnerId].name} 获得了胜利！`, 'skill');
+  } else {
+    appendLog(state, `游戏结束！双方同时丧失战斗能力，平局！`, 'info');
+  }
 };
 
 const startRound = (state: GameState) => {
@@ -352,7 +358,7 @@ const resolveCombat = (state: GameState) => {
 
   // End conditions
   if (attacker.hp <= 0 && defender.hp <= 0) {
-    endGame(state, state.hostId); // Tie goes to host for simplicity, or we can handle it
+    endGame(state, null); // Draw
   } else if (attacker.hp <= 0) {
     endGame(state, defender.id);
   } else if (defender.hp <= 0) {
@@ -514,7 +520,7 @@ export const processAction = (prevState: GameState, action: GameAction): GameSta
       // Reset players
       Object.keys(state.players).forEach(pId => {
         const player = state.players[pId];
-        state.players[pId] = createInitialPlayer(player.id, player.name);
+        state.players[pId] = createInitialPlayer(player.id, player.name, player.wins);
       });
       state.turnNumber = 0;
       state.attackerId = null;
